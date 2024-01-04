@@ -1,17 +1,186 @@
 <!DOCTYPE html>
-<html lang="">
-  <head>
-    <meta charset="utf-8">
-    <meta http-equiv="X-UA-Compatible" content="IE=edge">
-    <meta name="viewport" content="width=device-width,initial-scale=1.0">
-    <link rel="icon" href="<%= BASE_URL %>favicon.ico">
-    <title><%= htmlWebpackPlugin.options.title %></title>
-  </head>
-  <body>
-    <noscript>
-      <strong>We're sorry but <%= htmlWebpackPlugin.options.title %> doesn't work properly without JavaScript enabled. Please enable it to continue.</strong>
-    </noscript>
-    <div id="app"></div>
-    <!-- built files will be auto injected -->
-  </body>
+<html>
+<head>
+    <title>Vue Modern Dropdowns</title>
+    <script src="https://cdn.jsdelivr.net/npm/vue@2.6.14/dist/vue.js"></script>
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: #f0f0f0;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            margin: 0;
+        }
+
+        #app {
+            background-color: white;
+            padding: 40px;
+            border-radius: 15px;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+            width: 400px;
+        }
+
+        label {
+            display: block;
+            font-weight: 600;
+            margin-bottom: 10px;
+            color: #333;
+        }
+
+        select, input[type="text"] {
+            width: calc(100% - 20px);
+            padding: 10px;
+            margin-bottom: 20px;
+            border-radius: 5px;
+            border: 1px solid #ccc;
+            font-size: 16px;
+            transition: border-color 0.3s;
+        }
+
+        select:hover, input[type="text"]:hover {
+            border-color: #888;
+        }
+
+        select:focus, input[type="text"]:focus {
+            outline: none;
+            border-color: #007BFF;
+            box-shadow: 0 0 0 2px rgba(0, 123, 255, 0.25);
+        }
+
+        .divider {
+            height: 1px;
+            background-color: #ddd;
+            margin: 20px 0;
+        }
+
+        button {
+            padding: 10px 20px;
+            border: none;
+            border-radius: 5px;
+            background-color: #28a745; /* Bootstrap green */
+            color: white;
+            font-size: 16px;
+            cursor: pointer;
+            transition: background-color 0.3s;
+        }
+
+        button:hover {
+            background-color: #218838; /* A slightly darker green */
+        }
+
+        button:focus {
+            outline: none;
+            box-shadow: 0 0 0 2px rgba(40, 167, 69, 0.5); /* Green shadow */
+        }
+
+        .button-container {
+            display: flex;
+            flex-direction: column; /* Aligns buttons vertically */
+        }
+
+        .grade-button {
+            background-color: #f8f9fa; /* Light grey background */
+            color: #28a745; /* Text color */
+            margin-bottom: 10px; /* Space between buttons */
+            transition: background-color 0.3s; /* Smooth transition for hover effect */
+        }
+
+        .grade-button:hover {
+            background-color: #28a745; /* Green background on hover */
+            color: white; /* White text on hover */
+        }
+
+        .selected-grade {
+            background-color: #28a745; /* Green background */
+            color: white; /* White text */
+        }
+    </style>
+</head>
+<body>
+    <div id="app">
+        <!-- Dropdown 1 -->
+        <div>
+            <label for="dropdown1">Choose an option:</label>
+            <select id="dropdown1" v-model="selectedOption1" @change="updateOptions2">
+                <option v-for="(value, key) in relations" :value="key">{{ key }}</option>
+            </select>
+        </div>
+
+        <!-- Dropdown 2 -->
+        <div>
+            <label for="dropdown2">Choose related option:</label>
+            <select id="dropdown2" v-model="selectedOption2">
+                <option v-for="option in options2" :value="option">{{ option }}</option>
+            </select>
+        </div>
+
+        <div class="divider"></div>
+
+        <!-- Text Entry 1 -->
+        <div>
+            <label for="textEntry1">Question</label>
+            <input id="textEntry1" type="text" v-model="textEntry1">
+        </div>
+
+        <!-- Text Entry 2 -->
+        <div>
+            <label for="textEntry2">Student Answer</label>
+            <input id="textEntry2" type="text" v-model="textEntry2">
+        </div>
+
+        <!-- Grading Buttons -->
+        <div class="button-container">
+            <label for="textEntry2">Grading</label>
+            <button type="button" class="grade-button" :class="{'selected-grade': selectedGrade === 'correct'}" @click="selectGrade('correct')">Correctly answered +2</button>
+            <button type="button" class="grade-button" :class="{'selected-grade': selectedGrade === 'partial'}" @click="selectGrade('partial')">Correct answer but mistakes in steps +1</button>
+            <button type="button" class="grade-button" :class="{'selected-grade': selectedGrade === 'incorrect'}" @click="selectGrade('incorrect')">Completely incorrect +0</button>
+        </div>
+
+        <!-- Button -->
+        <div>
+            <button type="button" @click="submitForm">Submit</button>
+        </div>
+    </div>
+
+    <script>
+        new Vue({
+            el: '#app',
+            data: {
+                selectedOption1: 'Country',
+                selectedOption2: 'Exam',
+                textEntry1: '',
+                textEntry2: '',
+                relations: {
+                    'US': ['TOEFL', 'AP', 'SAT'],
+                    'UK': ['ALEVEL', 'IELTS']
+                },
+                options2: [],
+                selectedGrade: '',
+            },
+            watch: {
+            selectedOption1: function(newVal) {
+                // Update the options for the second dropdown
+                this.options2 = this.relations[newVal] || [];
+                // Reset selectedOption2 to its default value whenever selectedOption1 changes
+                this.selectedOption2 = '';
+            }
+        },
+        methods: {
+            submitForm: function() {
+                // Handle the submission logic here
+                console.log('Option 1:', this.selectedOption1);
+                console.log('Option 2:', this.selectedOption2);
+                console.log('Text Entry 1:', this.textEntry1);
+                console.log('Text Entry 2:', this.textEntry2);
+                // Add your form submission logic here
+            },
+            selectGrade: function(grade) {
+                this.selectedGrade = grade;
+            },
+        }
+        });
+    </script>
+</body>
 </html>
