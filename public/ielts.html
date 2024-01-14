@@ -160,11 +160,10 @@
       </div>
       <div id="app">
         <div>
-          <label for="dropdown1">Entry Form Template</label>
+          <label for="dropdown1">IELTS Templates</label>
           <select
             id="dropdown1"
             v-model="selectedOption1"
-            @change="updateOptions2"
           >
             <option v-for="(value, key) in relations" :value="key">
               {{ key }}
@@ -264,54 +263,62 @@
               <label>Grading</label>
             </div>
           </div>
-          <div
-            v-for="(set, index) in sets"
-            :key="index"
-            class="horizontal-section"
-          >
-            <div class="question-number-section">
-              <p>{{ set.no }}</p>
+          <div v-for="(set, index) in sets" :key="index">
+            <div v-if="index === 0">
+              Reading Passage 1: William Henry Perkin
             </div>
-            <div class="labels-section">
-              <div class="input-tag-container">
-                <button
-                  type="button"
-                  class="selected-tag"
-                  v-for="tag in set.selectedTags"
-                  @click="removeTag(set, tag)"
-                >
-                  {{ tag }}
-                </button>
-                <input
-                  type="text"
-                  v-model="set.labelSearch"
-                  @input="filterTags(set)"
-                  placeholder="Search and select tags"
-                />
-              </div>
-              <div class="tags-container">
-                <button
-                  type="button"
-                  class="tag-button"
-                  v-for="tag in set.filteredTags"
-                  @click="addTag(set, tag)"
-                >
-                  {{ tag }}
-                </button>
-              </div>
+            <div v-if="index === 13">
+              <div class="divider"></div>
+              Reading Passage 2: Is There Anybody Out There?
             </div>
-            <div class="grading-section">
-              <div class="grading-label-input">
+            <div v-if="index === 26">
+              <div class="divider"></div>
+              Reading Passage 3: The History of the Tortoise
+            </div>
+            <div class="horizontal-section">
+              <div class="question-number-section">
+                <p>{{ set.no }}</p>
               </div>
-              <div class="button-container">
-                <button
-                  type="button"
-                  class="grade-button"
-                  :class="{ 'selected-grade': set.isGraded }"
-                  @click="toggleGrading(set)"
-                >
-                  {{ set.isGraded ? '+1' : '+0' }}
-                </button>
+              <div class="labels-section">
+                <div class="input-tag-container">
+                  <button
+                    type="button"
+                    class="selected-tag"
+                    v-for="tag in set.selectedTags"
+                    @click="removeTag(set, tag)"
+                  >
+                    {{ tag }}
+                  </button>
+                  <input
+                    type="text"
+                    v-model="set.labelSearch"
+                    @input="filterTags(set)"
+                    placeholder="Search and select tags"
+                  />
+                </div>
+                <div class="tags-container">
+                  <button
+                    type="button"
+                    class="tag-button"
+                    v-for="tag in set.filteredTags"
+                    @click="addTag(set, tag)"
+                  >
+                    {{ tag }}
+                  </button>
+                </div>
+              </div>
+              <div class="grading-section">
+                <div class="grading-label-input"></div>
+                <div class="button-container">
+                  <button
+                    type="button"
+                    class="grade-button"
+                    :class="{ 'selected-grade': set.isGraded }"
+                    @click="toggleGrading(set)"
+                  >
+                    {{ set.isGraded ? '+1' : '+0' }}
+                  </button>
+                </div>
               </div>
             </div>
           </div>
@@ -362,10 +369,18 @@
           selectedOption1: function (newVal) {
             this.options2 = this.relations[newVal] || [];
             this.selectedOption2 = "";
+
+            this.sets = [            {
+              no: 1,
+              selectedTags: [],
+              selectedGrade: "",
+              fullMark: 1,
+              isGraded: false, 
+            },]
           },
           selectedOption2: function (newVal) {
             this.camb9test1();
-          }
+          },
         },
         methods: {
           selectGrade: function (set, grade) {
@@ -407,13 +422,16 @@
           toggleGrading: function (set) {
             set.isGraded = !set.isGraded;
           },
-          camb9test1: function() {
-            if (this.selectedOption1 === 'Cambridge IELTS 9' && this.selectedOption2 === 'Test 1') {
+          camb9test1: function () {
+            if (
+              this.selectedOption1 === "Cambridge IELTS 9" &&
+              this.selectedOption2 === "Test 1"
+            ) {
               for (let i = 0; i < 39; i++) {
                 this.addSet();
               }
             }
-          }
+          },
         },
       });
     </script>
