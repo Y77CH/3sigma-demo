@@ -1,0 +1,384 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <title>Grading Entry Form - Economics</title>
+    <style>
+      body {
+        font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
+        background-color: #f0f0f0;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        height: 100vh;
+        margin: 0;
+      }
+      #app {
+        background-color: white;
+        padding: 40px;
+        border-radius: 15px;
+        box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+        width: 80%;
+      }
+      label {
+        display: block;
+        font-weight: 600;
+        margin-bottom: 10px;
+        color: #333;
+      }
+      select,
+      input[type="text"],
+      input[type="number"] {
+        width: calc(100% - 20px);
+        padding: 10px;
+        margin-bottom: 20px;
+        border-radius: 5px;
+        border: 1px solid #ccc;
+        font-size: 16px;
+        transition: border-color 0.3s;
+      }
+      select:focus,
+      input[type="text"]:focus,
+      input[type="number"]:focus {
+        outline: none;
+        border-color: #007bff;
+        box-shadow: 0 0 0 2px rgba(0, 123, 255, 0.25);
+      }
+      .divider {
+        height: 1px;
+        background-color: #ddd;
+        margin: 20px 0;
+      }
+      button {
+        padding: 10px 20px;
+        border: none;
+        border-radius: 5px;
+        background-color: #28a745;
+        color: white;
+        font-size: 16px;
+        cursor: pointer;
+        transition: background-color 0.3s;
+      }
+      button:hover {
+        background-color: #218838;
+      }
+      button:focus {
+        outline: none;
+        box-shadow: 0 0 0 2px rgba(40, 167, 69, 0.5);
+      }
+      .button-container {
+        display: flex;
+        flex-direction: column;
+      }
+      .grade-button {
+        background-color: #f8f9fa;
+        color: #28a745;
+        margin-bottom: 10px;
+        transition: background-color 0.3s;
+      }
+      .grade-button:hover,
+      .selected-grade {
+        background-color: #28a745;
+        color: white;
+      }
+      .horizontal-section {
+        display: flex;
+        justify-content: space-between;
+        align-items: flex-start;
+      }
+      .question-section,
+      .student-answer-section,
+      .grading-section {
+        flex: 1;
+        margin-right: 10px;
+      }
+      .horizontal-section > div:last-child {
+        margin-right: 0;
+      }
+      .grading-label-input {
+        display: flex;
+        align-items: center;
+        justify-content: flex-start;
+        gap: 10px;
+      }
+      input[type="number"] {
+        width: 80px;
+      }
+      .labels-section {
+        flex: 1;
+        margin-right: 20px;
+      }
+      .tags-container,
+      .input-tag-container {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 5px;
+        margin-top: 10px;
+      }
+      .input-tag-container {
+        align-items: center;
+        border: 1px solid #ccc;
+        padding: 5px;
+        border-radius: 5px;
+      }
+      .selected-tag,
+      .tag-button {
+        padding: 5px 10px;
+        border: 1px solid #ccc;
+        border-radius: 5px;
+        cursor: pointer;
+        transition: background-color 0.3s;
+        font-size: 14px;
+        background-color: white;
+        color: black;
+      }
+      .selected-tag:hover,
+      .tag-button:hover {
+        background-color: #f2f2f2;
+        color: black;
+      }
+      .selected-tag {
+        background-color: #28a745;
+        color: white;
+      }
+      .question-number-section {
+        margin-right: 20px;
+      }
+    </style>
+  </head>
+  <body>
+    <div style="width: 80%; margin: auto">
+      <!-- Container for alignment -->
+      <div
+        style="
+          padding-top: 10px;
+          padding-bottom: 20px;
+          font-size: 14px;
+          color: gray;
+        "
+      >
+        UK > ALEVEL > ECONOMICS (9708)
+      </div>
+      <div
+        id="app"
+        style="
+          background-color: white;
+          padding: 40px;
+          border-radius: 15px;
+          box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+        "
+      >
+        <div>
+          <label for="dropdown1">Paper Number</label>
+          <select
+            id="dropdown1"
+            v-model="selectedOption1"
+            @change="updateOptions2"
+          >
+            <option v-for="(value, key) in relations" :value="key">
+              {{ key }}
+            </option>
+          </select>
+        </div>
+        <!-- <div>
+          <label for="dropdown2">Choose related option:</label>
+          <select id="dropdown2" v-model="selectedOption2">
+            <option v-for="option in options2" :value="option">
+              {{ option }}
+            </option>
+          </select>
+        </div> -->
+        <div class="divider"></div>
+        <div
+          v-for="(set, index) in sets"
+          :key="index"
+          class="horizontal-section"
+        >
+          <div class="question-number-section">
+            <label>No.</label>
+            <p>{{ set.no }}</p>
+          </div>
+          <div class="labels-section">
+            <label for="labelsInput">Labels</label>
+            <div class="input-tag-container">
+              <button
+                type="button"
+                class="selected-tag"
+                v-for="tag in set.selectedTags"
+                @click="removeTag(set, tag)"
+              >
+                {{ tag }}
+              </button>
+              <input
+                type="text"
+                v-model="set.labelSearch"
+                @input="filterTags(set)"
+                placeholder="Search and select tags"
+              />
+            </div>
+            <div class="tags-container">
+              <button
+                type="button"
+                class="tag-button"
+                v-for="tag in set.filteredTags"
+                @click="addTag(set, tag)"
+              >
+                {{ tag }}
+              </button>
+            </div>
+          </div>
+          <div class="grading-section">
+            <label>Grading</label>
+            <div class="grading-label-input">
+              <!-- Conditionally render the toggle button for Paper 1 and Paper 3 -->
+              <button
+              v-if="selectedOption1 === 'Paper 1 - AS Level Multiple Choice' || selectedOption1 === 'Paper 3 - A Level Multiple Choice'"
+              :class="['grade-button', { 'selected-grade': set.toggled }]"
+              @click="toggleGrade(set)"
+                >
+                True
+              </button>
+              <input
+                v-if="isNumericInput"
+                type="number"
+                v-model.number="set.fullMark"
+                min="0"
+                max="20"
+                step="1"
+              />
+            </div>
+          </div>
+          <!-- <button @click="addSet">+</button> -->
+        </div>
+      </div>
+    </div>
+    <script src="https://cdn.jsdelivr.net/npm/vue@2.6.14/dist/vue.js"></script>
+    <script>
+      new Vue({
+        el: "#app",
+        data: {
+          selectedOption1: "Country",
+          selectedOption2: "Exam",
+          relations: {
+            "Paper 1 - AS Level Multiple Choice": [],
+            "Paper 2 - AS Level Data Response and Essays": [],
+            "Paper 3 - A Level Multiple Choice": [],
+            "Paper 4 - A Level Data Response and Essays": [],
+          },
+          options2: [],
+          allTags: [
+            "1.1 Scarcity, choice and opportunity cost",
+            "1.2 Economic methodology",
+            "1.3 Factors of production",
+            "1.4 Resource allocation in different economic systems",
+            "1.5 Production possibility curves",
+            "1.6 Classification of goods and services",
+            "2.1 Demand and supply curves",
+            "2.2 Price elasticity, income elasticity and cross elasticity of demand",
+            "2.3 Price elasticity of supply",
+            "2.4 The interaction of demand and supply",
+            "2.5 Consumer and producer surplus",
+          ],
+          sets: [
+            {
+              no: 1,
+              selectedTags: [],
+              selectedGrade: "",
+              fullMark: 1,
+              toggled: false,  
+            },
+          ],
+          selectedOption1: "",
+        },
+        watch: {
+          selectedOption1: function (newVal) {
+            // Adjust the row count based on the paper selected
+            if (
+              newVal === "Paper 1 - AS Level Multiple Choice" ||
+              newVal === "Paper 3 - A Level Multiple Choice"
+            ) {
+              this.rowCount = 30;
+            } else if (
+              newVal === "Paper 2 - AS Level Data Response and Essays" ||
+              newVal === "Paper 4 - A Level Data Response and Essays"
+            ) {
+              this.rowCount = 3;
+            } else {
+              this.rowCount = 0; // Default to 0 rows if nothing or invalid is selected
+            }
+            this.generateSets();
+          },
+        },
+        computed: {
+          // Computed property to determine if numeric input is needed
+          isNumericInput() {
+            return (
+              this.selectedOption1 ===
+                "Paper 2 - AS Level Data Response and Essays" ||
+              this.selectedOption1 ===
+                "Paper 4 - A Level Data Response and Essays"
+            );
+          },
+        },
+        methods: {
+          selectGrade: function (set, grade) {
+            set.selectedGrade = grade;
+          },
+          addTag: function (set, tag) {
+            if (!set.selectedTags.includes(tag)) {
+              set.selectedTags.unshift(tag);
+              set.labelSearch = "";
+            }
+          },
+          removeTag: function (set, tag) {
+            const index = set.selectedTags.indexOf(tag);
+            if (index > -1) {
+              set.selectedTags.splice(index, 1);
+              set.labelSearch = "";
+            }
+          },
+          filterTags: function (set) {
+            if (set.labelSearch === "") {
+              set.filteredTags = [];
+            } else {
+              set.filteredTags = this.allTags.filter(
+                (tag) =>
+                  tag.toLowerCase().includes(set.labelSearch.toLowerCase()) &&
+                  !set.selectedTags.includes(tag)
+              );
+            }
+          },
+          addSet: function () {
+            const nextNo = this.sets.length + 1;
+            this.sets.push({
+              no: nextNo,
+              selectedTags: [],
+              selectedGrade: "",
+              fullMark: 1,
+            });
+          },
+          generateSets: function () {
+            // Adjust the fullMark based on the selected paper
+            const defaultFullMark = this.isNumericInput ? 20 : 1;
+            this.sets = [];
+            for (let i = 1; i <= this.rowCount; i++) {
+              this.sets.push({
+                no: i,
+                selectedTags: [],
+                selectedGrade: "",
+                fullMark: defaultFullMark,
+              });
+            }
+          },
+        toggleGrade: function (set) {
+            // Toggle the 'toggled' property
+            set.toggled = !set.toggled;
+          },
+        },
+        mounted: function () {
+          // Call generateSets on mount to ensure the sets are initialized based on the default rowCount
+          this.generateSets();
+        },
+      });
+    </script>
+  </body>
+</html>

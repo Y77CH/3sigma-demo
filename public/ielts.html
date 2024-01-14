@@ -1,0 +1,421 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <title>Grading Entry Form - IELTS</title>
+    <style>
+      body {
+        font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
+        background-color: #f0f0f0;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        height: 100vh;
+        margin: 0;
+      }
+      #app {
+        background-color: white;
+        padding: 40px;
+        border-radius: 15px;
+        box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+        width: 80%;
+      }
+      label {
+        display: block;
+        font-weight: 600;
+        margin-bottom: 10px;
+        color: #333;
+      }
+      select,
+      input[type="text"],
+      input[type="number"] {
+        width: calc(100% - 20px);
+        padding: 10px;
+        margin-bottom: 20px;
+        border-radius: 5px;
+        border: 1px solid #ccc;
+        font-size: 16px;
+        transition: border-color 0.3s;
+      }
+      select:focus,
+      input[type="text"]:focus,
+      input[type="number"]:focus {
+        outline: none;
+        border-color: #007bff;
+        box-shadow: 0 0 0 2px rgba(0, 123, 255, 0.25);
+      }
+      .divider {
+        height: 1px;
+        background-color: #ddd;
+        margin: 20px 0;
+      }
+      button {
+        padding: 10px 20px;
+        border: none;
+        border-radius: 5px;
+        background-color: #28a745;
+        color: white;
+        font-size: 16px;
+        cursor: pointer;
+        transition: background-color 0.3s;
+      }
+      button:hover {
+        background-color: #218838;
+      }
+      button:focus {
+        outline: none;
+        box-shadow: 0 0 0 2px rgba(40, 167, 69, 0.5);
+      }
+      .button-container {
+        display: flex;
+        flex-direction: column;
+      }
+      .grade-button {
+        background-color: #f8f9fa;
+        color: #28a745;
+        margin-bottom: 10px;
+        transition: background-color 0.3s;
+      }
+      .grade-button:hover,
+      .selected-grade {
+        background-color: #28a745;
+        color: white;
+      }
+      .horizontal-section {
+        display: flex;
+        justify-content: space-between;
+        align-items: flex-start;
+      }
+      .question-section,
+      .student-answer-section,
+      .grading-section {
+        flex: 1;
+        margin-right: 10px;
+      }
+      .horizontal-section > div:last-child {
+        margin-right: 0;
+      }
+      .grading-label-input {
+        display: flex;
+        align-items: center;
+        justify-content: flex-start;
+        gap: 10px;
+      }
+      input[type="number"] {
+        width: 80px;
+      }
+      .labels-section {
+        flex: 1;
+        margin-right: 20px;
+      }
+      .tags-container,
+      .input-tag-container {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 5px;
+        margin-top: 10px;
+      }
+      .input-tag-container {
+        align-items: center;
+        border: 1px solid #ccc;
+        padding: 5px;
+        border-radius: 5px;
+      }
+      .selected-tag,
+      .tag-button {
+        padding: 5px 10px;
+        border: 1px solid #ccc;
+        border-radius: 5px;
+        cursor: pointer;
+        transition: background-color 0.3s;
+        font-size: 14px;
+        background-color: white;
+        color: black;
+      }
+      .selected-tag:hover,
+      .tag-button:hover {
+        background-color: #f2f2f2;
+        color: black;
+      }
+      .selected-tag {
+        background-color: #28a745;
+        color: white;
+      }
+      .question-number-section {
+        margin-right: 20px;
+      }
+    </style>
+  </head>
+  <body>
+    <div style="width: 80%; margin: auto">
+      <!-- Container for alignment -->
+      <div
+        style="
+          padding-top: 10px;
+          padding-bottom: 20px;
+          font-size: 14px;
+          color: gray;
+        "
+      >
+        English Proficiency > IELTS > Reading
+      </div>
+      <div id="app">
+        <div>
+          <label for="dropdown1">Entry Form Template</label>
+          <select
+            id="dropdown1"
+            v-model="selectedOption1"
+            @change="updateOptions2"
+          >
+            <option v-for="(value, key) in relations" :value="key">
+              {{ key }}
+            </option>
+          </select>
+        </div>
+        <div v-if="selectedOption1 != '' &&selectedOption1 != 'Custom'">
+          <label for="dropdown2">Test Number</label>
+          <select id="dropdown2" v-model="selectedOption2">
+            <option v-for="option in options2" :value="option">
+              {{ option }}
+            </option>
+          </select>
+        </div>
+        <div class="divider"></div>
+        <div v-if="selectedOption1 === 'Custom'">
+          <!-- Labels outside the loop -->
+          <div class="horizontal-section">
+            <div class="question-number-section">
+              <label>No.</label>
+            </div>
+            <div class="labels-section">
+              <label for="labelsInput">Labels</label>
+            </div>
+            <div class="grading-section">
+              <label>Grading</label>
+            </div>
+          </div>
+          <div
+            v-for="(set, index) in sets"
+            :key="index"
+            class="horizontal-section"
+          >
+            <div class="question-number-section">
+              <p>{{ set.no }}</p>
+            </div>
+            <div class="labels-section">
+              <div class="input-tag-container">
+                <button
+                  type="button"
+                  class="selected-tag"
+                  v-for="tag in set.selectedTags"
+                  @click="removeTag(set, tag)"
+                >
+                  {{ tag }}
+                </button>
+                <input
+                  type="text"
+                  v-model="set.labelSearch"
+                  @input="filterTags(set)"
+                  placeholder="Search and select tags"
+                />
+              </div>
+              <div class="tags-container">
+                <button
+                  type="button"
+                  class="tag-button"
+                  v-for="tag in set.filteredTags"
+                  @click="addTag(set, tag)"
+                >
+                  {{ tag }}
+                </button>
+              </div>
+            </div>
+            <div class="grading-section">
+              <div class="grading-label-input">
+                <input type="number" v-model.number="set.fullMark" min="0" />
+              </div>
+              <div class="button-container">
+                <button
+                  type="button"
+                  class="grade-button"
+                  v-for="mark in parseInt(set.fullMark) + 1"
+                  :key="mark"
+                  :class="{'selected-grade': set.selectedGrade === mark-1}"
+                  @click="selectGrade(set, mark-1)"
+                >
+                  {{ mark-1 }}
+                </button>
+              </div>
+            </div>
+            <button @click="addSet">+</button>
+          </div>
+        </div>
+        <div
+          v-if="selectedOption1 === 'Cambridge IELTS 9' && selectedOption2 === 'Test 1'"
+        >
+          <!-- Labels outside the loop -->
+          <div class="horizontal-section">
+            <div class="question-number-section">
+              <label>No.</label>
+            </div>
+            <div class="labels-section">
+              <label for="labelsInput">Labels</label>
+            </div>
+            <div class="grading-section">
+              <label>Grading</label>
+            </div>
+          </div>
+          <div
+            v-for="(set, index) in sets"
+            :key="index"
+            class="horizontal-section"
+          >
+            <div class="question-number-section">
+              <p>{{ set.no }}</p>
+            </div>
+            <div class="labels-section">
+              <div class="input-tag-container">
+                <button
+                  type="button"
+                  class="selected-tag"
+                  v-for="tag in set.selectedTags"
+                  @click="removeTag(set, tag)"
+                >
+                  {{ tag }}
+                </button>
+                <input
+                  type="text"
+                  v-model="set.labelSearch"
+                  @input="filterTags(set)"
+                  placeholder="Search and select tags"
+                />
+              </div>
+              <div class="tags-container">
+                <button
+                  type="button"
+                  class="tag-button"
+                  v-for="tag in set.filteredTags"
+                  @click="addTag(set, tag)"
+                >
+                  {{ tag }}
+                </button>
+              </div>
+            </div>
+            <div class="grading-section">
+              <div class="grading-label-input">
+              </div>
+              <div class="button-container">
+                <button
+                  type="button"
+                  class="grade-button"
+                  :class="{ 'selected-grade': set.isGraded }"
+                  @click="toggleGrading(set)"
+                >
+                  {{ set.isGraded ? '+1' : '+0' }}
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <script src="https://cdn.jsdelivr.net/npm/vue@2.6.14/dist/vue.js"></script>
+    <script>
+      new Vue({
+        el: "#app",
+        data: {
+          selectedOption1: "",
+          selectedOption2: "",
+          relations: {
+            "Cambridge IELTS 1": ["Test 1", "Test 2", "Test 3", "Test 4"],
+            "Cambridge IELTS 2": ["Test 1", "Test 2", "Test 3", "Test 4"],
+            "Cambridge IELTS 3": ["Test 1", "Test 2", "Test 3", "Test 4"],
+            "Cambridge IELTS 4": ["Test 1", "Test 2", "Test 3", "Test 4"],
+            "Cambridge IELTS 5": ["Test 1", "Test 2", "Test 3", "Test 4"],
+            "Cambridge IELTS 6": ["Test 1", "Test 2", "Test 3", "Test 4"],
+            "Cambridge IELTS 7": ["Test 1", "Test 2", "Test 3", "Test 4"],
+            "Cambridge IELTS 8": ["Test 1", "Test 2", "Test 3", "Test 4"],
+            "Cambridge IELTS 9": ["Test 1", "Test 2", "Test 3", "Test 4"],
+            "Cambridge IELTS 10": ["Test 1", "Test 2", "Test 3", "Test 4"],
+            "Cambridge IELTS 11": ["Test 1", "Test 2", "Test 3", "Test 4"],
+            "Cambridge IELTS 12": ["Test 1", "Test 2", "Test 3", "Test 4"],
+            "Cambridge IELTS 13": ["Test 1", "Test 2", "Test 3", "Test 4"],
+            "Cambridge IELTS 14": ["Test 1", "Test 2", "Test 3", "Test 4"],
+            "Cambridge IELTS 15": ["Test 1", "Test 2", "Test 3", "Test 4"],
+            "Cambridge IELTS 16": ["Test 1", "Test 2", "Test 3", "Test 4"],
+            "Cambridge IELTS 17": ["Test 1", "Test 2", "Test 3", "Test 4"],
+            "Cambridge IELTS 18": ["Test 1", "Test 2", "Test 3", "Test 4"],
+            Custom: [],
+          },
+          options2: [],
+          allTags: ["Topic1", "Topic2", "Topic3"],
+          sets: [
+            {
+              no: 1,
+              selectedTags: [],
+              selectedGrade: "",
+              fullMark: 1,
+              isGraded: false, // correct or incorrect
+            },
+          ],
+        },
+        watch: {
+          selectedOption1: function (newVal) {
+            this.options2 = this.relations[newVal] || [];
+            this.selectedOption2 = "";
+          },
+          selectedOption2: function (newVal) {
+            this.camb9test1();
+          }
+        },
+        methods: {
+          selectGrade: function (set, grade) {
+            set.selectedGrade = grade;
+          },
+          addTag: function (set, tag) {
+            if (!set.selectedTags.includes(tag)) {
+              set.selectedTags.unshift(tag);
+              set.labelSearch = "";
+            }
+          },
+          removeTag: function (set, tag) {
+            const index = set.selectedTags.indexOf(tag);
+            if (index > -1) {
+              set.selectedTags.splice(index, 1);
+              set.labelSearch = "";
+            }
+          },
+          filterTags: function (set) {
+            if (set.labelSearch === "") {
+              set.filteredTags = [];
+            } else {
+              set.filteredTags = this.allTags.filter(
+                (tag) =>
+                  tag.toLowerCase().includes(set.labelSearch.toLowerCase()) &&
+                  !set.selectedTags.includes(tag)
+              );
+            }
+          },
+          addSet: function () {
+            const nextNo = this.sets.length + 1;
+            this.sets.push({
+              no: nextNo,
+              selectedTags: [],
+              selectedGrade: "",
+              fullMark: 1,
+            });
+          },
+          toggleGrading: function (set) {
+            set.isGraded = !set.isGraded;
+          },
+          camb9test1: function() {
+            if (this.selectedOption1 === 'Cambridge IELTS 9' && this.selectedOption2 === 'Test 1') {
+              for (let i = 0; i < 39; i++) {
+                this.addSet();
+              }
+            }
+          }
+        },
+      });
+    </script>
+  </body>
+</html>
