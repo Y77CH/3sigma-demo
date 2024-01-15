@@ -12,12 +12,33 @@
         height: 100vh;
         margin: 0;
       }
+      .main-container {
+        display: flex;
+        width: 90%;
+      }
       #app {
         background-color: white;
+        flex: 3; /* 3/4 of the space */
         padding: 40px;
         border-radius: 15px;
         box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
         width: 80%;
+      }
+      .graphs-container {
+        flex: 1; /* 1/4 of the space */
+        padding: 40px;
+        background-color: #e9e9e9;
+        overflow-y: auto; /* for scrolling if graphs exceed the view height */
+      }
+      .spider-graph {
+        width: 100%;
+        margin-bottom: 20px;
+        /* Temporary styles for demonstration */
+        height: 200px;
+        background-color: #ccc;
+        display: flex;
+        justify-content: center;
+        align-items: center;
       }
       label {
         display: block;
@@ -146,7 +167,7 @@
     </style>
   </head>
   <body>
-    <div style="width: 80%; margin: auto">
+    <div style="width: 90%; margin: auto">
       <!-- Container for alignment -->
       <div
         style="
@@ -158,124 +179,43 @@
       >
         English Proficiency > IELTS > Reading
       </div>
-      <div id="app">
-        <div>
-          <label for="dropdown1">IELTS Templates</label>
-          <select
-            id="dropdown1"
-            v-model="selectedOption1"
-          >
-            <option v-for="(value, key) in relations" :value="key">
-              {{ key }}
-            </option>
-          </select>
-        </div>
-        <div v-if="selectedOption1 != '' &&selectedOption1 != 'Custom'">
-          <label for="dropdown2">Test Number</label>
-          <select id="dropdown2" v-model="selectedOption2">
-            <option v-for="option in options2" :value="option">
-              {{ option }}
-            </option>
-          </select>
-        </div>
-        <div class="divider"></div>
-        <div v-if="selectedOption1 === 'Custom'">
-          <!-- Labels outside the loop -->
-          <div class="horizontal-section">
-            <div class="question-number-section">
-              <label>No.</label>
-            </div>
-            <div class="labels-section">
-              <label for="labelsInput">Labels</label>
-            </div>
-            <div class="grading-section">
-              <label>Grading</label>
-            </div>
+      <div class="main-container">
+        <div id="app">
+          <div>
+            <label for="dropdown1">IELTS Templates</label>
+            <select id="dropdown1" v-model="selectedOption1">
+              <option v-for="(value, key) in relations" :value="key">
+                {{ key }}
+              </option>
+            </select>
           </div>
-          <div
-            v-for="(set, index) in sets"
-            :key="index"
-            class="horizontal-section"
-          >
-            <div class="question-number-section">
-              <p>{{ set.no }}</p>
-            </div>
-            <div class="labels-section">
-              <div class="input-tag-container">
-                <button
-                  type="button"
-                  class="selected-tag"
-                  v-for="tag in set.selectedTags"
-                  @click="removeTag(set, tag)"
-                >
-                  {{ tag }}
-                </button>
-                <input
-                  type="text"
-                  v-model="set.labelSearch"
-                  @input="filterTags(set)"
-                  placeholder="Search and select tags"
-                />
-              </div>
-              <div class="tags-container">
-                <button
-                  type="button"
-                  class="tag-button"
-                  v-for="tag in set.filteredTags"
-                  @click="addTag(set, tag)"
-                >
-                  {{ tag }}
-                </button>
-              </div>
-            </div>
-            <div class="grading-section">
-              <div class="grading-label-input">
-                <input type="number" v-model.number="set.fullMark" min="0" />
-              </div>
-              <div class="button-container">
-                <button
-                  type="button"
-                  class="grade-button"
-                  v-for="mark in parseInt(set.fullMark) + 1"
-                  :key="mark"
-                  :class="{'selected-grade': set.selectedGrade === mark-1}"
-                  @click="selectGrade(set, mark-1)"
-                >
-                  {{ mark-1 }}
-                </button>
-              </div>
-            </div>
-            <button @click="addSet">+</button>
+          <div v-if="selectedOption1 != '' &&selectedOption1 != 'Custom'">
+            <label for="dropdown2">Test Number</label>
+            <select id="dropdown2" v-model="selectedOption2">
+              <option v-for="option in options2" :value="option">
+                {{ option }}
+              </option>
+            </select>
           </div>
-        </div>
-        <div
-          v-if="selectedOption1 === 'Cambridge IELTS 9' && selectedOption2 === 'Test 1'"
-        >
-          <!-- Labels outside the loop -->
-          <div class="horizontal-section">
-            <div class="question-number-section">
-              <label>No.</label>
-            </div>
-            <div class="labels-section">
-              <label for="labelsInput">Labels</label>
-            </div>
-            <div class="grading-section">
-              <label>Grading</label>
-            </div>
-          </div>
-          <div v-for="(set, index) in sets" :key="index">
-            <div v-if="index === 0">
-              Reading Passage 1: William Henry Perkin
-            </div>
-            <div v-if="index === 13">
-              <div class="divider"></div>
-              Reading Passage 2: Is There Anybody Out There?
-            </div>
-            <div v-if="index === 26">
-              <div class="divider"></div>
-              Reading Passage 3: The History of the Tortoise
-            </div>
+          <div class="divider"></div>
+          <div v-if="selectedOption1 === 'Custom'">
+            <!-- Labels outside the loop -->
             <div class="horizontal-section">
+              <div class="question-number-section">
+                <label>No.</label>
+              </div>
+              <div class="labels-section">
+                <label for="labelsInput">Labels</label>
+              </div>
+              <div class="grading-section">
+                <label>Grading</label>
+              </div>
+            </div>
+            <div
+              v-for="(set, index) in sets"
+              :key="index"
+              class="horizontal-section"
+            >
               <div class="question-number-section">
                 <p>{{ set.no }}</p>
               </div>
@@ -308,24 +248,109 @@
                 </div>
               </div>
               <div class="grading-section">
-                <div class="grading-label-input"></div>
+                <div class="grading-label-input">
+                  <input type="number" v-model.number="set.fullMark" min="0" />
+                </div>
                 <div class="button-container">
                   <button
                     type="button"
                     class="grade-button"
-                    :class="{ 'selected-grade': set.isGraded }"
-                    @click="toggleGrading(set)"
+                    v-for="mark in parseInt(set.fullMark) + 1"
+                    :key="mark"
+                    :class="{'selected-grade': set.selectedGrade === mark-1}"
+                    @click="selectGrade(set, mark-1)"
                   >
-                    {{ set.isGraded ? '+1' : '+0' }}
+                    {{ mark-1 }}
                   </button>
+                </div>
+              </div>
+              <button @click="addSet">+</button>
+            </div>
+          </div>
+          <div
+            v-if="selectedOption1 === 'Cambridge IELTS 9' && selectedOption2 === 'Test 1'"
+          >
+            <!-- Labels outside the loop -->
+            <div class="horizontal-section">
+              <div class="question-number-section">
+                <label>No.</label>
+              </div>
+              <div class="labels-section">
+                <label for="labelsInput">Labels</label>
+              </div>
+              <div class="grading-section">
+                <label>Grading</label>
+              </div>
+            </div>
+            <div v-for="(set, index) in sets" :key="index">
+              <div v-if="index === 0">
+                Reading Passage 1: William Henry Perkin
+              </div>
+              <div v-if="index === 13">
+                <div class="divider"></div>
+                Reading Passage 2: Is There Anybody Out There?
+              </div>
+              <div v-if="index === 26">
+                <div class="divider"></div>
+                Reading Passage 3: The History of the Tortoise
+              </div>
+              <div class="horizontal-section">
+                <div class="question-number-section">
+                  <p>{{ set.no }}</p>
+                </div>
+                <div class="labels-section">
+                  <div class="input-tag-container">
+                    <button
+                      type="button"
+                      class="selected-tag"
+                      v-for="tag in set.selectedTags"
+                      @click="removeTag(set, tag)"
+                    >
+                      {{ tag }}
+                    </button>
+                    <input
+                      type="text"
+                      v-model="set.labelSearch"
+                      @input="filterTags(set)"
+                      placeholder="Search and select tags"
+                    />
+                  </div>
+                  <div class="tags-container">
+                    <button
+                      type="button"
+                      class="tag-button"
+                      v-for="tag in set.filteredTags"
+                      @click="addTag(set, tag)"
+                    >
+                      {{ tag }}
+                    </button>
+                  </div>
+                </div>
+                <div class="grading-section">
+                  <div class="grading-label-input"></div>
+                  <div class="button-container">
+                    <button
+                      type="button"
+                      class="grade-button"
+                      :class="{ 'selected-grade': set.isGraded }"
+                      @click="toggleGrading(set)"
+                    >
+                      {{ set.isGraded ? '+1' : '+0' }}
+                    </button>
+                  </div>
                 </div>
               </div>
             </div>
           </div>
         </div>
+        <div class="graphs-container">
+          <!-- Canvas for spider graph -->
+          <canvas id="spiderGraph" width="400" height="400"></canvas>
+        </div>
       </div>
     </div>
     <script src="https://cdn.jsdelivr.net/npm/vue@2.6.14/dist/vue.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <script>
       new Vue({
         el: "#app",
@@ -354,43 +379,57 @@
             Custom: [],
           },
           options2: [],
-          allTags: ["Topic1", "Topic2", "Topic3"],
+          allTags: ["Skill1", "Skill2", "Skill3", "Skill4", "Skill5"],
           sets: [
             {
               no: 1,
               selectedTags: [],
-              selectedGrade: "",
+              selectedGrade: 0,
               fullMark: 1,
               isGraded: false, // correct or incorrect
             },
           ],
+          myChart: null,
         },
         watch: {
           selectedOption1: function (newVal) {
             this.options2 = this.relations[newVal] || [];
             this.selectedOption2 = "";
 
-            this.sets = [            {
-              no: 1,
-              selectedTags: [],
-              selectedGrade: "",
-              fullMark: 1,
-              isGraded: false, 
-            },]
+            this.sets = [
+              {
+                no: 1,
+                selectedTags: [],
+                selectedGrade: 0,
+                fullMark: 1,
+                isGraded: false,
+              },
+            ];
           },
           selectedOption2: function (newVal) {
             this.camb9test1();
           },
+          sets: {
+            deep: true,
+            handler: function () {
+              this.updateSpiderChart();
+            },
+          },
+        },
+        mounted() {
+          this.createSpiderChart();
         },
         methods: {
           selectGrade: function (set, grade) {
             set.selectedGrade = grade;
+            this.updateSpiderChart();
           },
           addTag: function (set, tag) {
             if (!set.selectedTags.includes(tag)) {
               set.selectedTags.unshift(tag);
               set.labelSearch = "";
             }
+            this.updateSpiderChart();
           },
           removeTag: function (set, tag) {
             const index = set.selectedTags.indexOf(tag);
@@ -398,6 +437,7 @@
               set.selectedTags.splice(index, 1);
               set.labelSearch = "";
             }
+            this.updateSpiderChart();
           },
           filterTags: function (set) {
             if (set.labelSearch === "") {
@@ -415,12 +455,19 @@
             this.sets.push({
               no: nextNo,
               selectedTags: [],
-              selectedGrade: "",
+              selectedGrade: 0,
               fullMark: 1,
+              isGraded: false,
             });
           },
           toggleGrading: function (set) {
             set.isGraded = !set.isGraded;
+            if (set.selectedGrade == 0) {
+              set.selectedGrade = 1;
+            } else {
+              set.selectedGrade = 0;
+            }
+            console.log("selected grade: ", set.selectedGrade);
           },
           camb9test1: function () {
             if (
@@ -430,6 +477,64 @@
               for (let i = 0; i < 39; i++) {
                 this.addSet();
               }
+            }
+          },
+          createSpiderChart() {
+            const ctx = document.getElementById("spiderGraph").getContext("2d");
+            const tagCounts = this.allTags.map((tag) =>
+              this.calculateTagCount(tag)
+            );
+            this.myChart = new Chart(ctx, {
+              type: "radar",
+              data: {
+                labels: this.allTags,
+                datasets: [
+                  {
+                    label: "Correctness Rate for Each Skill",
+                    data: tagCounts,
+                    backgroundColor: ["rgba(255, 99, 132, 0.2)"],
+                    borderColor: ["rgba(255, 99, 132, 1)"],
+                    borderWidth: 1,
+                  },
+                ],
+              },
+              options: {
+                scales: {
+                  r: {
+                    beginAtZero: true,
+                  },
+                },
+              },
+            });
+          },
+          calculateTagCount(tag) {
+            let totalFullMark = 0;
+            let totalEarnedGrade = 0;
+
+            this.sets.forEach((set) => {
+              if (set.selectedTags.includes(tag)) {
+                totalFullMark += set.fullMark;
+                totalEarnedGrade += set.selectedGrade;
+              }
+            });
+
+            console.log(tag);
+            console.log(totalEarnedGrade);
+            console.log(totalFullMark);
+
+            // Check to prevent division by zero
+            if (totalFullMark === 0) {
+              return 0;
+            }
+
+            return totalEarnedGrade / totalFullMark;
+          },
+          updateSpiderChart() {
+            if (this.myChart) {
+              this.myChart.data.datasets[0].data = this.allTags.map((tag) =>
+                this.calculateTagCount(tag)
+              );
+              this.myChart.update();
             }
           },
         },
