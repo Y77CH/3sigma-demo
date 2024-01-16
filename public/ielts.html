@@ -164,9 +164,40 @@
       .question-number-section {
         margin-right: 20px;
       }
+      /* Additional styles for loading animation */
+      .loading-animation {
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background-color: #fff;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        font-size: 24px;
+        color: #333;
+      }
+
+      @keyframes fade {
+        0%,
+        100% {
+          opacity: 1;
+        }
+        50% {
+          opacity: 0.5;
+        }
+      }
+
+      .loading-text {
+        animation: fade 2s linear infinite;
+      }
     </style>
   </head>
   <body>
+    <div class="loading-animation">
+      <!-- <span class="loading-text">Waiting...</span> -->
+    </div>
     <div style="width: 90%; margin: auto">
       <!-- Container for alignment -->
       <div
@@ -276,7 +307,10 @@
                 <label>No.</label>
               </div>
               <div class="labels-section">
-                <label for="labelsInput">Labels</label>
+                <label for="labelsInput">Type</label>
+              </div>
+              <div class="labels-section">
+                <label for="labelsInput">Difficulty</label>
               </div>
               <div class="grading-section">
                 <label>Grading</label>
@@ -326,6 +360,34 @@
                     </button>
                   </div>
                 </div>
+                <div class="labels-section">
+                  <div class="input-tag-container">
+                    <button
+                      type="button"
+                      class="selected-tag"
+                      v-for="tag in set.selectedTags2"
+                      @click="removeTag2(set, tag)"
+                    >
+                      {{ tag }}
+                    </button>
+                    <input
+                      type="text"
+                      v-model="set.labelSearch2"
+                      @input="filterTags2(set)"
+                      placeholder="Search and select tags"
+                    />
+                  </div>
+                  <div class="tags-container">
+                    <button
+                      type="button"
+                      class="tag-button"
+                      v-for="tag in set.filteredTags2"
+                      @click="addTag2(set, tag)"
+                    >
+                      {{ tag }}
+                    </button>
+                  </div>
+                </div>
                 <div class="grading-section">
                   <div class="grading-label-input"></div>
                   <div class="button-container">
@@ -346,12 +408,16 @@
         <div class="graphs-container">
           <!-- Canvas for spider graph -->
           <canvas id="spiderGraph" width="400" height="400"></canvas>
+          <canvas id="barChart" width="400" height="400" v-if="selectedOption1 != 'Custom'"></canvas>
         </div>
       </div>
     </div>
     <script src="https://cdn.jsdelivr.net/npm/vue@2.6.14/dist/vue.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <script>
+      window.onload = function () {
+        document.querySelector(".loading-animation").style.display = "none";
+      };
       new Vue({
         el: "#app",
         data: {
@@ -379,11 +445,19 @@
             Custom: [],
           },
           options2: [],
-          allTags: ["Skill1", "Skill2", "Skill3", "Skill4", "Skill5"],
+          allTags: [
+            "Identification",
+            "Matching",
+            "Multiple Choice",
+            "Short Answer",
+            "Completion",
+          ],
+          allTags2: ["Low", "Medium", "High"],
           sets: [
             {
               no: 1,
               selectedTags: [],
+              selectedTags2: [],
               selectedGrade: 0,
               fullMark: 1,
               isGraded: false, // correct or incorrect
@@ -400,6 +474,7 @@
               {
                 no: 1,
                 selectedTags: [],
+                selectedTags2: [],
                 selectedGrade: 0,
                 fullMark: 1,
                 isGraded: false,
@@ -413,11 +488,13 @@
             deep: true,
             handler: function () {
               this.updateSpiderChart();
+              this.updateBarChart();
             },
           },
         },
         mounted() {
           this.createSpiderChart();
+          this.createBarChart();
         },
         methods: {
           selectGrade: function (set, grade) {
@@ -431,13 +508,27 @@
             }
             this.updateSpiderChart();
           },
+          addTag2: function (set, tag) {
+            if (!set.selectedTags2.includes(tag)) {
+              set.selectedTags2.unshift(tag);
+              set.labelSearch2 = "";
+            }
+            this.updateBarChart();
+          },
           removeTag: function (set, tag) {
             const index = set.selectedTags.indexOf(tag);
             if (index > -1) {
               set.selectedTags.splice(index, 1);
               set.labelSearch = "";
             }
-            this.updateSpiderChart();
+          },
+          removeTag2: function (set, tag) {
+            const index = set.selectedTags2.indexOf(tag);
+            if (index > -1) {
+              set.selectedTags2.splice(index, 1);
+              set.labelSearch2 = "";
+            }
+            this.updateBarChart();
           },
           filterTags: function (set) {
             if (set.labelSearch === "") {
@@ -450,11 +541,24 @@
               );
             }
           },
+          filterTags2: function (set) {
+            if (set.labelSearch2 === "") {
+              set.filteredTags2 = [];
+            } else {
+              set.filteredTags2 = this.allTags2.filter(
+                (tag) =>
+                  tag.toLowerCase().includes(set.labelSearch2.toLowerCase()) &&
+                  !set.selectedTags.includes(tag)
+              );
+            }
+            this.updateBarChart();
+          },
           addSet: function () {
             const nextNo = this.sets.length + 1;
             this.sets.push({
               no: nextNo,
               selectedTags: [],
+              selectedTags2: [],
               selectedGrade: 0,
               fullMark: 1,
               isGraded: false,
@@ -467,7 +571,6 @@
             } else {
               set.selectedGrade = 0;
             }
-            console.log("selected grade: ", set.selectedGrade);
           },
           camb9test1: function () {
             if (
@@ -490,10 +593,10 @@
                 labels: this.allTags,
                 datasets: [
                   {
-                    label: "Correctness Rate for Each Skill",
+                    label: "Question Type Correctness Rate",
                     data: tagCounts,
-                    backgroundColor: ["rgba(255, 99, 132, 0.2)"],
-                    borderColor: ["rgba(255, 99, 132, 1)"],
+                    backgroundColor: ["rgba(40, 167, 69, 0.2)"],
+                    borderColor: ["rgba(40, 167, 69, 1)"],
                     borderWidth: 1,
                   },
                 ],
@@ -518,10 +621,6 @@
               }
             });
 
-            console.log(tag);
-            console.log(totalEarnedGrade);
-            console.log(totalFullMark);
-
             // Check to prevent division by zero
             if (totalFullMark === 0) {
               return 0;
@@ -535,6 +634,61 @@
                 this.calculateTagCount(tag)
               );
               this.myChart.update();
+            }
+          },
+          calculateFullMarkCount(tag) {
+            let totalFullMark = 0;
+            let totalEarnedGrade = 0;
+
+            this.sets.forEach((set) => {
+              if (set.selectedTags2.includes(tag)) {
+                totalFullMark += set.fullMark;
+                totalEarnedGrade += set.selectedGrade;
+              }
+            });
+
+            // Check to prevent division by zero
+            if (totalFullMark === 0) {
+              return 0;
+            }
+
+            return totalEarnedGrade / totalFullMark;
+          },
+
+          createBarChart() {
+            const ctx = document.getElementById("barChart").getContext("2d");
+            this.myBarChart = new Chart(ctx, {
+              type: "bar",
+              data: {
+                labels: this.allTags2,
+                datasets: [
+                  {
+                    label: "Difficulty Correctness Rate",
+                    data: this.allTags2.map((tag) =>
+                      this.calculateFullMarkCount(tag)
+                    ),
+                    backgroundColor: "rgba(40, 167, 69, 0.2)",
+                    borderColor: "rgba(40, 167, 69, 1)",
+                    borderWidth: 1,
+                  },
+                ],
+              },
+              options: {
+                scales: {
+                  y: {
+                    beginAtZero: true,
+                  },
+                },
+              },
+            });
+          },
+
+          updateBarChart() {
+            if (this.myBarChart) {
+              this.myBarChart.data.datasets[0].data = this.allTags2.map((tag) =>
+                this.calculateFullMarkCount(tag)
+              );
+              this.myBarChart.update();
             }
           },
         },

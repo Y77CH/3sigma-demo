@@ -2,8 +2,8 @@
 
 ## Road Map
 
-* [ ] Columns: Question Type, Difficulty
 * [ ] (Entry page for switching economics form and ielts form)
+* [X] Columns: Question Type, Difficulty
 * [X] Analytics on right side
 * [X] Divider and reading name between readings
 * [X] Remove duplicate "No.", "Labels"
