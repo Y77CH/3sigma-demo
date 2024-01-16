@@ -46,6 +46,15 @@
         margin-bottom: 10px;
         color: #333;
       }
+      input[type="text2"] {
+        width: calc(100% - 20px);
+        padding: 10px;
+        margin-bottom: 3;
+        border-radius: 5px;
+        border: 1px solid #ccc;
+        font-size: 16px;
+        transition: border-color 0.3s;
+      }
       select,
       input[type="text"],
       input[type="number"] {
@@ -137,7 +146,7 @@
       }
       .input-tag-container {
         align-items: center;
-        border: 1px solid #ccc;
+        border: 1px transparent #ccc;
         padding: 5px;
         border-radius: 5px;
       }
@@ -261,7 +270,7 @@
                     {{ tag }}
                   </button>
                   <input
-                    type="text"
+                    type="text2"
                     v-model="set.labelSearch"
                     @input="filterTags(set)"
                     placeholder="Search and select tags"
@@ -343,7 +352,7 @@
                       {{ tag }}
                     </button>
                     <input
-                      type="text"
+                      type="text2"
                       v-model="set.labelSearch"
                       @input="filterTags(set)"
                       placeholder="Search and select tags"
@@ -371,7 +380,7 @@
                       {{ tag }}
                     </button>
                     <input
-                      type="text"
+                      type="text2"
                       v-model="set.labelSearch2"
                       @input="filterTags2(set)"
                       placeholder="Search and select tags"
@@ -408,7 +417,12 @@
         <div class="graphs-container">
           <!-- Canvas for spider graph -->
           <canvas id="spiderGraph" width="400" height="400"></canvas>
-          <canvas id="barChart" width="400" height="400" v-if="selectedOption1 != 'Custom'"></canvas>
+          <canvas
+            id="barChart"
+            width="400"
+            height="400"
+            v-if="selectedOption1 != 'Custom'"
+          ></canvas>
         </div>
       </div>
     </div>
@@ -504,6 +518,10 @@
           addTag: function (set, tag) {
             if (!set.selectedTags.includes(tag)) {
               set.selectedTags.unshift(tag);
+              const index = set.filteredTags.indexOf(tag);
+              if (index > -1) {
+                set.filteredTags.splice(index, 1);
+              }
               set.labelSearch = "";
             }
             this.updateSpiderChart();
@@ -511,6 +529,10 @@
           addTag2: function (set, tag) {
             if (!set.selectedTags2.includes(tag)) {
               set.selectedTags2.unshift(tag);
+              const index = set.filteredTags2.indexOf(tag);
+              if (index > -1) {
+                set.filteredTags2.splice(index, 1);
+              }
               set.labelSearch2 = "";
             }
             this.updateBarChart();
